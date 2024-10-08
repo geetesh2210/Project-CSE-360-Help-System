@@ -1,0 +1,2 @@
+ID    Username             Email                          Password             Role       First Name           Last Name            Middle Name          Preferred Name      
+1     admin                Alice@gmail.com                123                  admin      alice                nguyen               thiminh              Alice               
