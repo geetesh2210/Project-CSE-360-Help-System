@@ -13,79 +13,72 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 
-public class windows{
-
-    private Stage primaryStage;
+public class windows {
+/*
+    private Stage primaryStage;  // This is the primaryStage from Main
     private static String adminUsername;
     private static String adminPassword;
-    private String userName;
-    private String userPassword;
     private static final DatabaseHelper databaseHelper = new DatabaseHelper();
 
+    // Constructor to pass in the primary stage
     public windows(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
 
+    // Scene 1: Create Admin Account
     public Pane getCreateAdminAccountPane() throws SQLException {
         Pane pane = new Pane();
-	    Label title = new Label("Create Admin Account");
-	        title.setFont(Font.font("Arial", 25));
-	        title.setLayoutY(40);
-	        title.setLayoutX(200);
-	
-	        TextField username = new TextField();
-	        username.setPromptText("Create Username");
-	        username.setLayoutX(250);
-	        username.setLayoutY(100);
-	
-	        PasswordField password = new PasswordField();
-	        password.setPromptText("Create Password");
-	        password.setLayoutX(250);
-	        password.setLayoutY(150);
-	
-	        PasswordField passCheck = new PasswordField();
-	        passCheck.setPromptText("Re-enter Password");
-	        passCheck.setLayoutX(250);
-	        passCheck.setLayoutY(200);
-	
-	        Button createButton = new Button("Create");
-	        createButton.setLayoutX(300);
-	        createButton.setLayoutY(250);
-	        createButton.setOnAction(e -> {
-	        adminUsername = username.getText();
-	        adminPassword = password.getText();
-	        System.out.println(adminUsername);
-	        System.out.println(adminPassword);
-	        
-	        primaryStage.setScene(new Scene(getFinishSetupAccountPane(), Main.WINDOW_WIDTH, Main.WINDOW_HEIGHT));
-	        try 
-	        {
-				databaseHelper.connectToDatabase();
-				if(!databaseHelper.doesUserExist(adminUsername))
-				{
-					databaseHelper.register(adminUsername, adminPassword, "admin");
-					databaseHelper.exportTableToFile();
-				}
-			} 
-	        catch (SQLException e1) 
-	        {
-				e1.printStackTrace();
-			} 
-	        catch (IOException e2)
-	        {
-				e2.printStackTrace();
-	        }
-	        finally
-	        {
-	        	System.out.println("Success");
-	        	databaseHelper.closeConnection();
-	        }   
-	    });
-	        
-	    pane.getChildren().addAll(title, username, password, passCheck, createButton);
+        Label title = new Label("Create Admin Account");
+        title.setFont(Font.font("Arial", 25));
+        title.setLayoutY(40);
+        title.setLayoutX(200);
+
+        TextField username = new TextField();
+        username.setPromptText("Create Username");
+        username.setLayoutX(250);
+        username.setLayoutY(100);
+
+        PasswordField password = new PasswordField();
+        password.setPromptText("Create Password");
+        password.setLayoutX(250);
+        password.setLayoutY(150);
+
+        PasswordField passCheck = new PasswordField();
+        passCheck.setPromptText("Re-enter Password");
+        passCheck.setLayoutX(250);
+        passCheck.setLayoutY(200);
+
+        Button createButton = new Button("Create");
+        createButton.setLayoutX(300);
+        createButton.setLayoutY(250);
+        createButton.setOnAction(e -> {
+            adminUsername = username.getText();
+            adminPassword = password.getText();
+            System.out.println(adminUsername);
+            System.out.println(adminPassword);
+
+            // Switch to the Finish Setup Account scene
+            primaryStage.setScene(new Scene(getFinishSetupAccountPane(), Main.WINDOW_WIDTH, Main.WINDOW_HEIGHT));
+
+            try {
+                databaseHelper.connectToDatabase();
+                if (!databaseHelper.doesUserExist(adminUsername)) {
+                    databaseHelper.register(adminUsername, adminPassword, "admin");
+                    databaseHelper.exportTableToFile();
+                }
+            } catch (SQLException | IOException e1) {
+                e1.printStackTrace();
+            } finally {
+                System.out.println("Success");
+                databaseHelper.closeConnection();
+            }
+        });
+
+        pane.getChildren().addAll(title, username, password, passCheck, createButton);
         return pane;
     }
-   
+
+    // Scene 2: Finish Setting Up Account
     public Pane getFinishSetupAccountPane() {
         Pane pane = new Pane();
 
@@ -127,39 +120,32 @@ public class windows{
         finishButton.setLayoutX(300);
         finishButton.setLayoutY(400);
         finishButton.setOnAction(e -> {
+            // Switch to the Login scene
             primaryStage.setScene(new Scene(getLoginPane(), Main.WINDOW_WIDTH, Main.WINDOW_HEIGHT));
-            String email, firstName, middleName, lastName, preName;
-            email = emailT.getText();
-            firstName = firstNameT.getText();
-            middleName = middleNameT.getText();
-            lastName = lastNameT.getText();
-            preName = preferredNameT.getText();
-            try 
-	        {
-				databaseHelper.connectToDatabase();
-				databaseHelper.updateInfo("admin", email, firstName, middleName, lastName, preName);
-				databaseHelper.exportTableToFile();
-			} 
-	        catch (SQLException e1) 
-	        {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} 
-	        catch (IOException e2)
-	        {
-				e2.printStackTrace();
-	        }
-	        finally
-	        {
-	        	System.out.println("Success");
-	        	databaseHelper.closeConnection();
-	        }               
+
+            String email = emailT.getText();
+            String firstName = firstNameT.getText();
+            String middleName = middleNameT.getText();
+            String lastName = lastNameT.getText();
+            String preName = preferredNameT.getText();
+
+            try {
+                databaseHelper.connectToDatabase();
+                databaseHelper.updateInfo(1, email, firstName, middleName, lastName, preName);
+                databaseHelper.exportTableToFile();
+            } catch (SQLException | IOException e1) {
+                e1.printStackTrace();
+            } finally {
+                System.out.println("Success");
+                databaseHelper.closeConnection();
+            }
         });
 
         pane.getChildren().addAll(title, usernameLabel, emailT, firstNameT, middleNameT, lastNameT, preferredNameT, finishButton);
         return pane;
     }
 
+    // Scene 3: Login
     public Pane getLoginPane() {
         Pane pane = new Pane();
 
@@ -183,7 +169,6 @@ public class windows{
         loginButton.setLayoutY(200);
         loginButton.setOnAction(e -> {
             primaryStage.setScene(new Scene(getHomePane(), Main.WINDOW_WIDTH, Main.WINDOW_HEIGHT));
-            
         });
 
         Button createAccountButton = new Button("Create Account");
@@ -197,6 +182,7 @@ public class windows{
         return pane;
     }
 
+    // Scene 4: Create Account
     public Pane getCreateAccountPane() {
         Pane pane = new Pane();
 
@@ -231,6 +217,7 @@ public class windows{
         return pane;
     }
 
+    // Scene 5: Home
     public Pane getHomePane() {
         Pane pane = new Pane();
 
@@ -244,4 +231,9 @@ public class windows{
         pane.getChildren().add(logOutButton);
         return pane;
     }
+    
+    */
 }
+	
+	
+	

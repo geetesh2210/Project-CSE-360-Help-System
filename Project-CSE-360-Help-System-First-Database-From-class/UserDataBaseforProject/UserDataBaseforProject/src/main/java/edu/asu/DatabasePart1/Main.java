@@ -14,16 +14,25 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Help Desk"); // Label the stage (a window)
         
-        theGUI = new windows(primaryStage); // Pass the Stage to MainInterface
+       
         
-        Scene theScene = new Scene(theGUI.getCreateAdminAccountPane(), WINDOW_WIDTH, WINDOW_HEIGHT); // Create the initial scene
         
-        primaryStage.setScene(theScene); // Set the scene on the stage
-        
+        SceneController sceneController = new SceneController(primaryStage);
+
+        // Set the initial scene (e.g., the admin creation pane)
+        sceneController.switchToCreateAdminScene();
+
+        // Show the stage with the initial scene
         primaryStage.show();
+        
+        
+        
     }
 
     public static void main(String[] args) {
         launch(args);
     }
+    
+    
+    
 }

@@ -1,2 +1,3 @@
 ID    Username             Email                          Password             Role       First Name           Last Name            Middle Name          Preferred Name      
-1     admin                Alice@gmail.com                123                  admin      alice                nguyen               thiminh              Alice               
+1     admin                null                           pass                 admin      null                 null                 null                 null                
+2     user                 null                           123                  admin      null                 null                 null                 null                
