@@ -1,6 +1,9 @@
 package edu.asu.DatabasePart1;
 
+import java.sql.SQLException;
+
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -11,11 +14,8 @@ import javafx.scene.text.Font;
 public class LoginScene {
 
     private Scene scene;
-    private SceneController controller;
-
+    private static final DatabaseHelper databaseHelper = new DatabaseHelper();
     public LoginScene(SceneController controller) {
-        this.controller = controller;
-
         Pane pane = new Pane();
 
         Label title = new Label("Log In");
@@ -37,17 +37,59 @@ public class LoginScene {
         loginButton.setLayoutX(300);
         loginButton.setLayoutY(200);
         loginButton.setOnAction(e -> {
-            // Perform login logic...
+        	if (username.getText().isEmpty() || password.getText().isEmpty()) {
+                showAlert("Username and password cannot be empty.");
+            } else {
+                try {
+                    // Validate username and password
+                    databaseHelper.connectToDatabase();
+                    String user = username.getText();
+                    String pass = password.getText();
+                    
+                    if (databaseHelper.doesUserExist(user) && databaseHelper.login(user, pass)) {
+                        // Switch to Home or Admin Home Scene based on user role
+                    	String role = databaseHelper.getCurrentRoles(user); // Use your method here
 
-            // Switch to Home or Admin Home Scene based on user role
-            controller.switchToHomeScene(); // or controller.switchToAdminHomeScene();
+                        // Switch to Home or Admin Home Scene based on user role
+                        if ("admin".equalsIgnoreCase(role)) {
+                            controller.switchToAdminHomeScene();
+                        } else {
+                            controller.switchToHomeScene();
+                        }
+                    }  else {
+                        showAlert("Invalid username or password.");
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    showAlert("An error occurred during login.");
+                } finally {
+                    databaseHelper.closeConnection();
+                }
+            }
         });
 
-        pane.getChildren().addAll(title, username, password, loginButton);
+       
+
+        Button createUserButton = new Button("Create New User");
+        createUserButton.setLayoutX(270);
+        createUserButton.setLayoutY(250);
+        createUserButton.setOnAction(e -> {
+            // Switch to Create User Scene
+            controller.switchToCreateUserScene();
+        });
+
+        pane.getChildren().addAll(title, username, password, createUserButton, loginButton);
         this.scene = new Scene(pane, 700, 500);
     }
 
     public Scene getScene() {
         return this.scene;
+    }
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
