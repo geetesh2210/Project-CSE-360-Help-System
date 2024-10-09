@@ -15,92 +15,29 @@ public class FinishProfileScene {
 	private Scene scene;
     private SceneController controller;
     private String adminUsername;
-    private String adminPassword;
+    
     private static final DatabaseHelper databaseHelper = new DatabaseHelper();
 
     public FinishProfileScene(SceneController controller) {
         this.controller = controller;
-
-        // Start with the admin creation pane
-        Pane createAdminPane = getCreateAdminAccountPane();
-        this.scene = new Scene(createAdminPane, 700, 500);
+        Pane pane = new Pane();  // Initialize a blank pane for the scene
+        this.scene = new Scene(pane, 700, 500);// Initialize the scene with the pane
+        switchToFinishProfilePane();
     }
-
-    // Create Admin Account Pane
-    private Pane getCreateAdminAccountPane() {
-        Pane pane = new Pane();
-
-        Label title = new Label("Create Admin Account");
-        title.setFont(Font.font("Arial", 25));
-        title.setLayoutY(40);
-        title.setLayoutX(200);
-
-        TextField username = new TextField();
-        username.setPromptText("Create Username");
-        username.setLayoutX(250);
-        username.setLayoutY(100);
-
-        PasswordField password = new PasswordField();
-        password.setPromptText("Create Password");
-        password.setLayoutX(250);
-        password.setLayoutY(150);
-
-        PasswordField passCheck = new PasswordField();
-        passCheck.setPromptText("Re-enter Password");
-        passCheck.setLayoutX(250);
-        passCheck.setLayoutY(200);
-
-        Button createButton = new Button("Create");
-        createButton.setLayoutX(300);
-        createButton.setLayoutY(250);
-        createButton.setOnAction(e -> {
-            // Get username and password input
-            adminUsername = username.getText();
-            adminPassword = password.getText();
-
-            // Check if the password and re-entered password match
-            if (!password.getText().equals(passCheck.getText())) {
-                System.out.println("Passwords do not match!");
-                return;
-            }
-
-            System.out.println("Username: " + adminUsername);
-            System.out.println("Password: " + adminPassword);
-
-            // Database operations for admin creation
-            try {
-                databaseHelper.connectToDatabase();
-                if (!databaseHelper.doesUserExist(adminUsername)) {
-                    databaseHelper.register(adminUsername, adminPassword, "admin");
-                    databaseHelper.exportTableToFile();
-                }
-            } catch (SQLException | IOException e1) {
-                e1.printStackTrace();
-            } finally {
-                System.out.println("Admin creation successful.");
-                databaseHelper.closeConnection();
-            }
-
-            // Switch to Finish Profile Pane
-            switchToFinishProfilePane();
-        });
-
-        pane.getChildren().addAll(title, username, password, passCheck, createButton);
-        return pane;
-    }
-
+    
+   
     // Finish Profile Pane
     private void switchToFinishProfilePane() {
         Pane pane = new Pane();
 
+       
+        
         Label title = new Label("Finish Setting Up Account");
         title.setFont(Font.font("Arial", 25));
         title.setLayoutY(40);
         title.setLayoutX(150);
 
-        Label usernameLabel = new Label("Username: " + adminUsername);
-        usernameLabel.setLayoutX(250);
-        usernameLabel.setLayoutY(100);
+        
 
         TextField emailT = new TextField();
         emailT.setPromptText("Enter Email");
@@ -153,7 +90,7 @@ public class FinishProfileScene {
             controller.switchToLoginScene();
         });
 
-        pane.getChildren().addAll(title, usernameLabel, emailT, firstNameT, middleNameT, lastNameT, preferredNameT, finishButton);
+        pane.getChildren().addAll(title, emailT, firstNameT, middleNameT, lastNameT, preferredNameT, finishButton);
         this.scene.setRoot(pane);  // Set the new pane as the root of the existing scene
     }
 
