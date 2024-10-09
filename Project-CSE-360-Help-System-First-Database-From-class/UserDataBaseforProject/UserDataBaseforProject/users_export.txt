@@ -1,0 +1,5 @@
+ID    Username             Email                          Password             Role                           First Name           Last Name            Middle Name          Preferred Name      
+1     admin                null                           pass                 admin                          null                 null                 null                 null                
+2     user                 null                           123                  admin                          null                 null                 null                 null                
+3     admin1               null                           12345                admin                          null                 null                 null                 null                
+4     admin12              email                          1234                 admin                          fname                lname                mname                name                
