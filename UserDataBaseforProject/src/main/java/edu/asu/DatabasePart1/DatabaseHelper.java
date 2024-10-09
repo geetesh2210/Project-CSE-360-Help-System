@@ -10,11 +10,13 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A helper class to store data
  * Credit: CSE360-Fall2024 class by Carter
- * Copied with minor edit to match the purposes
+ * Copied with edit to match the purposes
  */
 class DatabaseHelper {
 
@@ -391,24 +393,27 @@ class DatabaseHelper {
 	 * A method to display all user in the database
 	 * @throws SQLException
 	 */
-	public void displayUsersByAdmin() throws SQLException{
+	public List<User> getListUsers() throws SQLException{
 		String sql = "SELECT * FROM cse360users"; 
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(sql); 
-
+		 List<User> users = new ArrayList<>(); // Initialize the list
+		
 		while(rs.next()) { 
 			// Retrieve by column name 
 			String  username = rs.getString("username"); 
 			String email = rs.getString("email");
-			String fullname = rs.getString("firstName") + rs.getString("middleName") + rs.getString("lastName");
+			String firstName = rs.getString("firstName");
+			String middleName = rs.getString("middleName"); 
+			String lastName	=	rs.getString("lastName");
+			String preferredName = rs.getString("preferredFirstName");
 			String role = rs.getString("role");  
-
-			// Display values 
-			System.out.print("Username: " + username); 
-			System.out.print(", Full Name: " + fullname); 
-			System.out.print(", Email: " + email);
-			System.out.println(", Role: " + role); 
+			User user = new User(username, email); // Properly instantiate the User object
+			user.userData(username, email, firstName, middleName, lastName, preferredName, role);
+			
+			users.add(user);
 		} 
+		return users;
 	}
 
 	public void closeConnection() {
