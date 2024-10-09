@@ -30,6 +30,11 @@ class DatabaseHelper {
 	private Statement statement = null; 
 	//	PreparedStatement pstmt
 	
+	/**
+	 * A Function to export the current data table to a text file for debugging
+	 * @throws IOException
+	 * @throws SQLException
+	 */
 	public void exportTableToFile() throws IOException, SQLException{
 	    String query = "SELECT * FROM cse360users";
 	    String fileName = "users_export.txt"; // Specify the file name here
@@ -40,7 +45,7 @@ class DatabaseHelper {
 	        ResultSet resultSet = statement.executeQuery(query);
 	        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 	        // Write header
-	    	 writer.write(String.format("%-5s %-20s %-30s %-20s %-10s %-20s %-20s %-20s %-20s", 
+	    	 writer.write(String.format("%-5s %-20s %-30s %-20s %-30s %-20s %-20s %-20s %-20s", 
 	                 "ID", "Username", "Email", "Password", "Role", 
 	                 "First Name", "Last Name", "Middle Name", "Preferred Name"));
 	         writer.newLine();
@@ -58,7 +63,7 @@ class DatabaseHelper {
 	            String preferredFirstName = resultSet.getString("preferredFirstName"); //preferredFirstName
 
 	            // Write a line to the file
-	            writer.write(String.format("%-5d %-20s %-30s %-20s %-10s %-20s %-20s %-20s %-20s",
+	            writer.write(String.format("%-5d %-20s %-30s %-20s %-30s %-20s %-20s %-20s %-20s",
 	                    id, username, email, password, role, 
 	                    firstName, lastName, middleName, preferredFirstName));
 	            writer.newLine();
@@ -72,7 +77,49 @@ class DatabaseHelper {
 	        throw e; // Rethrow or handle as appropriate
 	    }
 	}
-	
+	/**
+	 * A Function to export the current data table but only username and their onetime code
+	 * If there is any
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public void exportOneTimeCodeList() throws IOException, SQLException{
+	    String query = "SELECT * FROM cse360users";
+	    String fileName = "onetimecode_export.txt"; // Specify the file name here
+	    
+	    try
+	    {
+	    	statement = connection.createStatement();
+	        ResultSet resultSet = statement.executeQuery(query);
+	        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+	        // Write header
+	    	 writer.write(String.format("%-20s %-30s %-30s", 
+	                 "Username", "One-Time Code", "Date"));
+	         writer.newLine();
+
+	        // Write data rows
+	        while (resultSet.next()) {
+	            String username = resultSet.getString("username");
+	            String onetimeCode = resultSet.getString("onetimeCode");
+	            String expireDate = resultSet.getString("expireDate");
+	            // Write a line to the file
+	            writer.write(String.format("%-20s %-30s %-30s",
+	                    username, onetimeCode, expireDate));
+	            writer.newLine();
+	        }
+	        writer.close();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw e; // Rethrow or handle as appropriate
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        throw e; // Rethrow or handle as appropriate
+	    }
+	}
+	/**
+	 * Delete the SQL table
+	 * @throws SQLException
+	 */
 	public void clearTable() throws SQLException{
 		String truncateQuery = "DROP TABLE IF EXISTS cse360users";
 		try
@@ -123,7 +170,11 @@ class DatabaseHelper {
 		statement.execute(userTable);
 	}
 
-	
+	/**
+	 * Checking if the database is empty
+	 * @return true if DatabaseEmpty
+	 * @throws SQLException
+	 */
 	// Check if the database is empty
 	public boolean isDatabaseEmpty() throws SQLException {
 		String query = "SELECT COUNT(*) AS count FROM cse360users";
@@ -222,24 +273,13 @@ class DatabaseHelper {
 	/*******************************************************************************************************************/
 	/*******************************************************************************************************************/
 	/**A BUNCH OF ADMIN RELATED FUNCTION**/
-	/**
-	 * A helper function to return a random code
-	 * @return a randomcode
-	 */
-	public String randomStringGenerator()
-	{
-		String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	    int CODE_LENGTH = 8;
-	    SecureRandom random = new SecureRandom();
-
-		StringBuilder code = new StringBuilder(CODE_LENGTH);
-        
-        for (int i = 0; i < CODE_LENGTH; i++) {
-            int index = random.nextInt(CHARACTERS.length());
-            code.append(CHARACTERS.charAt(index));
-        }
-		return code.toString();
-	}
+	
+	
+	
+	/****************************************************************************************/
+	/****************************************************************************************/
+	/****************************************************************************************/
+	//FUNCTION FOR ADMIN TO USE
 	/**
 	 * A function to reset userAccount from admin perspective
 	 * @param username username to reset
@@ -271,61 +311,13 @@ class DatabaseHelper {
 	        }
 	    }	
 	}
-	
-	private String getCurrentRoles(String username) throws SQLException 
-	{
-	    String query = "SELECT role FROM cse360users WHERE username = ?";
-	    try (PreparedStatement pstmt = connection.prepareStatement(query)) 
-	    {
-	        pstmt.setString(1, username);
-	        ResultSet rs = pstmt.executeQuery();
-	        if (rs.next()) {
-	            return rs.getString("role");
-	        }
-	        return ""; // User not found or error
-	    }     
-	}
-	
-	private String removeRole(String currentRoles, String role) 
-	{
-	    String[] rolesArray = currentRoles.split(" ");
-	    StringBuilder updatedRoles = new StringBuilder();
-	    for (String r : rolesArray) {
-	        if (!r.equals(role)) {
-	            updatedRoles.append(r).append(" ");
-	        }
-	    }
-	    return updatedRoles.toString().trim(); // Remove trailing space
-	}
-
-	private String addRole(String currentRoles, String role) 
-	{
-	    if (currentRoles.isEmpty()) {
-	        return role; // If no roles, just add the new one
-	    }
-	    return currentRoles + " " + role; // Append new role
-	}
-	
-	private boolean updateRolesInDatabase(String username, String updatedRoles) throws SQLException
-	{
-	    String updateQuery = "UPDATE cse360users SET role = ? WHERE username = ?";
-
-	    try (PreparedStatement pstmt = connection.prepareStatement(updateQuery)) 
-	    {
-	        pstmt.setString(1, updatedRoles);
-	        pstmt.setString(2, username);
-	        
-	        int rowsAffected = pstmt.executeUpdate();
-	        if (rowsAffected > 0) {
-	            System.out.println("Roles updated successfully.");
-	            return true;
-	        } else {
-	            System.out.println("Failed to update roles.");
-	            return false;
-	        }
-	    }
-	}
-	
+	/**
+	 * Add role for a user
+	 * @param username the username to look for role
+	 * @param roleToAdd role to add
+	 * @return true if added success, false if not
+	 * @throws SQLException
+	 */
 	public boolean addUserRole(String username, String roleToAdd) throws SQLException
 	{
 		String currentRoles = getCurrentRoles(username);
@@ -336,10 +328,21 @@ class DatabaseHelper {
 	    else
 	    {
 	    	String newRoles = addRole(currentRoles, roleToAdd);
+	    	if(newRoles.equals(currentRoles))
+	    	{
+	    		return false;
+	    	}
 	    	return updateRolesInDatabase(username, newRoles);
 	    }	
 	}
 	
+	/**
+	 * Remove a role from user
+	 * @param username
+	 * @param roleToRemove
+	 * @return
+	 * @throws SQLException
+	 */
 	public boolean removeUserRole(String username, String roleToRemove) throws SQLException
 	{
 		String currentRoles = getCurrentRoles(username);
@@ -350,6 +353,13 @@ class DatabaseHelper {
 	    else
 	    {
 	    	String newRoles = removeRole(currentRoles, roleToRemove);
+	    	System.out.println(currentRoles);
+	    	System.out.println(newRoles);
+	    	if(newRoles.equals(currentRoles))
+	    	{
+	    		System.out.println("Role not found.");
+	    		return false;
+	    	}
 	    	return updateRolesInDatabase(username, newRoles);
 	    }
 		
@@ -413,5 +423,88 @@ class DatabaseHelper {
 			se.printStackTrace(); 
 		} 
 	}
+	/*************************************************************************************/
+	/*************************************************************************************/
+	/*************************************************************************************/
+	/**Helper Function for class, not needed to use in program**/
+	private String getCurrentRoles(String username) throws SQLException 
+	{
+	    String query = "SELECT role FROM cse360users WHERE username = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) 
+	    {
+	        pstmt.setString(1, username);
+	        ResultSet rs = pstmt.executeQuery();
+	        if (rs.next()) {
+	            return rs.getString("role");
+	        }
+	        return ""; // User not found or error
+	    }     
+	}
+	
+	private String removeRole(String currentRoles, String role) 
+	{
+	    String[] rolesArray = currentRoles.split(" ");
+	    StringBuilder updatedRoles = new StringBuilder();
+	    for (String r : rolesArray) {
+	        if (!r.equals(role)) {
+	            updatedRoles.append(r).append(" ");
+	        }
+	    }
+	    return updatedRoles.toString().trim(); // Remove trailing space
+	}
 
+	private String addRole(String currentRoles, String role) 
+	{
+	    if (currentRoles.isEmpty()) {
+	        return role; // If no roles, just add the new one
+	    }
+	 // Split current roles into an array
+	    String[] rolesArray = currentRoles.split(" ");
+	    
+	    // Check if the role already exists
+	    for (String existingRole : rolesArray) {
+	        if (existingRole.equals(role)) {
+	            return currentRoles; // Return current roles unchanged if the role exists
+	        }
+	    }
+	    
+	    // Append new role if it does not exist
+	    return currentRoles + " " + role;
+	}
+	
+	private boolean updateRolesInDatabase(String username, String updatedRoles) throws SQLException
+	{
+	    String updateQuery = "UPDATE cse360users SET role = ? WHERE username = ?";
+
+	    try (PreparedStatement pstmt = connection.prepareStatement(updateQuery)) 
+	    {
+	        pstmt.setString(1, updatedRoles);
+	        pstmt.setString(2, username);
+	        
+	        int rowsAffected = pstmt.executeUpdate();
+	        if (rowsAffected > 0) {
+	            return true;
+	        } else {
+	            return false;
+	        }
+	    }
+	}
+	/**
+	 * A helper function to return a random code
+	 * @return a randomcode
+	 */
+	private String randomStringGenerator()
+	{
+		String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	    int CODE_LENGTH = 10;
+	    SecureRandom random = new SecureRandom();
+
+		StringBuilder code = new StringBuilder(CODE_LENGTH);
+        
+        for (int i = 0; i < CODE_LENGTH; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            code.append(CHARACTERS.charAt(index));
+        }
+		return code.toString();
+	}
 }
