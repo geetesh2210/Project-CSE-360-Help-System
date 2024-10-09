@@ -10,13 +10,11 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A helper class to store data
  * Credit: CSE360-Fall2024 class by Carter
- * Copied with edit to match the purposes
+ * Copied with minor edit to match the purposes
  */
 class DatabaseHelper {
 
@@ -196,6 +194,7 @@ class DatabaseHelper {
 	 */
 	public void register(String username, String password, String role) throws SQLException {
 		//the command to that we would like to execute on the table
+		role = getUserCount() == 0 ? "ADMIN" : "USER"; // Check if it's the first user
 		String insertUser = "INSERT INTO cse360users (username, password, role) VALUES (?, ?, ?)";
 		//set the data to insert
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
@@ -393,27 +392,24 @@ class DatabaseHelper {
 	 * A method to display all user in the database
 	 * @throws SQLException
 	 */
-	public List<User> getListUsers() throws SQLException{
+	public void displayUsersByAdmin() throws SQLException{
 		String sql = "SELECT * FROM cse360users"; 
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(sql); 
-		 List<User> users = new ArrayList<>(); // Initialize the list
-		
+
 		while(rs.next()) { 
 			// Retrieve by column name 
 			String  username = rs.getString("username"); 
 			String email = rs.getString("email");
-			String firstName = rs.getString("firstName");
-			String middleName = rs.getString("middleName"); 
-			String lastName	=	rs.getString("lastName");
-			String preferredName = rs.getString("preferredFirstName");
+			String fullname = rs.getString("firstName") + rs.getString("middleName") + rs.getString("lastName");
 			String role = rs.getString("role");  
-			User user = new User(username, email); // Properly instantiate the User object
-			user.userData(username, email, firstName, middleName, lastName, preferredName, role);
-			
-			users.add(user);
+
+			// Display values 
+			System.out.print("Username: " + username); 
+			System.out.print(", Full Name: " + fullname); 
+			System.out.print(", Email: " + email);
+			System.out.println(", Role: " + role); 
 		} 
-		return users;
 	}
 
 	public void closeConnection() {
@@ -432,7 +428,7 @@ class DatabaseHelper {
 	/*************************************************************************************/
 	/*************************************************************************************/
 	/**Helper Function for class, not needed to use in program**/
-	private String getCurrentRoles(String username) throws SQLException 
+	public String getCurrentRoles(String username) throws SQLException 
 	{
 	    String query = "SELECT role FROM cse360users WHERE username = ?";
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) 
@@ -512,4 +508,16 @@ class DatabaseHelper {
         }
 		return code.toString();
 	}
+	private int getUserCount() throws SQLException {
+	    String countQuery = "SELECT COUNT(*) FROM cse360users";
+	    try (PreparedStatement pstmt = connection.prepareStatement(countQuery);
+	         ResultSet rs = pstmt.executeQuery()) {
+	        if (rs.next()) {
+	            return rs.getInt(1); // Return the count of users
+	        }
+	    }
+	    return 0; // Return 0 if there's an error or no users
+	}
 }
+
+
