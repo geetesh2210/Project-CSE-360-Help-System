@@ -1,2 +1,0 @@
-ID    Username             Email                          Password             Role                           First Name           Last Name            Middle Name          Preferred Name      
-1     test1                null                           1                    student                        null                 null                 null                 null                
