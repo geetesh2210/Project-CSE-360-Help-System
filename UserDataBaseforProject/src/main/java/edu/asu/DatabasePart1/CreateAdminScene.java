@@ -2,6 +2,7 @@ package edu.asu.DatabasePart1;
 
 
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -18,6 +19,7 @@ public class CreateAdminScene {
 	    private SceneController controller;
 	    private String adminUsername;
 	    private String adminPassword;
+	    private String confirmPassword;
 	    private static final DatabaseHelper databaseHelper = new DatabaseHelper();
 
 	    public CreateAdminScene(SceneController controller) {
@@ -53,33 +55,35 @@ public class CreateAdminScene {
 	            // Get username and password input
 	            adminUsername = username.getText();
 	            adminPassword = password.getText();
+	            confirmPassword = passCheck.getText();
 
-	            // Check if the password and re-entered password match
-	            if (!password.getText().equals(passCheck.getText())) {
-	                System.out.println("Passwords do not match!");
-	                return;
-	            }
-
-	            System.out.println("Username: " + adminUsername);
-	            System.out.println("Password: " + adminPassword);
-
-	            // Database operations and scene switching
 	            try {
-	                databaseHelper.connectToDatabase();
-	                if (!databaseHelper.doesUserExist(adminUsername)) {
-	                    databaseHelper.register(adminUsername, adminPassword, "admin");
-	                    databaseHelper.exportTableToFile();
+	                if (adminUsername.isEmpty() || adminPassword.isEmpty()) {
+	                    showAlert("Username and password cannot be empty.");
+	                } else if (!adminPassword.equals(confirmPassword)) {
+	                    showAlert("Passwords must match.");
+	                } else {
+	                    databaseHelper.connectToDatabase();
+	                    if (!databaseHelper.doesUserExist(adminUsername)) {
+	                        databaseHelper.register(adminUsername, adminPassword, "admin");
+	                        databaseHelper.exportTableToFile();
+	                        // Switch to the Finish Setup Account scene only after successful registration
+	                        controller.switchToFinishProfileScene();
+	                    } else {
+	                        showAlert("Username already exists.");
+	                    }
 	                }
-	            } catch (SQLException | IOException e1) {
-	                e1.printStackTrace();
+	            } catch (SQLException | IOException ex) {
+	                ex.printStackTrace();
+	                showAlert("An error occurred during registration.");
 	            } finally {
 	                System.out.println("Database operation complete.");
 	                databaseHelper.closeConnection();
 	            }
-
-	            // Switch to the Finish Setup Account scene after successful registration
-	            controller.switchToFinishProfileScene();
+	            
 	        });
+	            // Database operations and scene switching
+	       
 
 	        // Add components to the pane
 	        pane.getChildren().addAll(title, username, password, passCheck, createButton);
@@ -91,5 +95,12 @@ public class CreateAdminScene {
 	    // Method to return the created scene
 	    public Scene getScene() {
 	        return this.scene;
+	    }
+	    private void showAlert(String message) {
+	        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+	        alert.setTitle("Information");
+	        alert.setHeaderText(null);
+	        alert.setContentText(message);
+	        alert.showAndWait();
 	    }
 }
