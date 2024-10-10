@@ -1,3 +1,4 @@
 ID    Username             Email                          Password             Role                           First Name           Last Name            Middle Name          Preferred Name      
-1     admin                null                           123                  ADMIN Random                   null                 null                 null                 null                
-3     bob                  null                           bbo                  student                        null                 null                 null                 null                
+1     admin                null                           123                  ADMIN                          null                 null                 null                 null                
+2     student              null                           stu                  student                        null                 null                 null                 null                
+3     instructor           null                           ins                  instructor                     null                 null                 null                 null                

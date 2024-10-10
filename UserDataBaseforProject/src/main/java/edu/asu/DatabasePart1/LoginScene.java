@@ -54,7 +54,7 @@ public class LoginScene {
                         // Switch to Home or Admin Home Scene based on user role
                     	 
 						 String roles = databaseHelper.getCurrentRoles(user); 
-						 boolean OTP = databaseHelper.isPasswordReset(user);
+						 //boolean OTP = databaseHelper.isPasswordReset(user);
 						 
 					
 						 databaseHelper.closeConnection();
