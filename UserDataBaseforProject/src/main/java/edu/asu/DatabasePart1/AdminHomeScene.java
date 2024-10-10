@@ -35,8 +35,10 @@ public class AdminHomeScene {
         resetUserButton.setOnAction(e -> {
             String username = resetUsernameField.getText();
             try {
+            	databaseHelper.connectToDatabase();
                 String code = databaseHelper.resetUserAccount(username);
                 showAlert(code.isEmpty() ? "User not found." : "Reset code sent: " + code);
+                databaseHelper.closeConnection();
             } catch (SQLException ex) {
                 showAlert("An error occurred while resetting the user account.");
                 ex.printStackTrace();
@@ -56,11 +58,14 @@ public class AdminHomeScene {
         addRoleField.setLayoutX(400);
         addRoleField.setLayoutY(100);
         addUserRoleButton.setOnAction(e -> {
+        	
             String username = addRoleUsernameField.getText();
             String roleToAdd = addRoleField.getText();
             try {
+            	databaseHelper.connectToDatabase();
                 boolean success = databaseHelper.addUserRole(username, roleToAdd);
                 showAlert(success ? "Role added successfully." : "User not found or role already exists.");
+                databaseHelper.closeConnection();
             } catch (SQLException ex) {
                 showAlert("An error occurred while adding the user role.");
                 ex.printStackTrace();
@@ -88,6 +93,7 @@ public class AdminHomeScene {
             	
                 boolean success = databaseHelper.removeUserRole(username, roleToRemove);
                 showAlert(success ? "Role removed successfully." : "User not found or role does not exist.");
+                databaseHelper.closeConnection();
             } catch (SQLException ex) {
                 showAlert("An error occurred while removing the user role.");
                 ex.printStackTrace();
@@ -105,8 +111,10 @@ public class AdminHomeScene {
         deleteUserButton.setOnAction(e -> {
             String username = deleteUsernameField.getText();
             try {
+            	databaseHelper.connectToDatabase();
                 boolean success = databaseHelper.deleteUserAccount(username);
                 showAlert(success ? "User account deleted successfully." : "User not found.");
+                databaseHelper.closeConnection();
             } catch (SQLException ex) {
                 showAlert("An error occurred while deleting the user account.");
                 ex.printStackTrace();
@@ -119,8 +127,10 @@ public class AdminHomeScene {
         displayUsersButton.setLayoutY(250);
         displayUsersButton.setOnAction(e -> {
             try {
+            	databaseHelper.connectToDatabase();
                 databaseHelper.displayUsersByAdmin(); // Assuming this method handles output internally
                 showAlert("Check console for user list.");
+                databaseHelper.closeConnection();
             } catch (SQLException ex) {
                 showAlert("An error occurred while displaying users.");
                 ex.printStackTrace();

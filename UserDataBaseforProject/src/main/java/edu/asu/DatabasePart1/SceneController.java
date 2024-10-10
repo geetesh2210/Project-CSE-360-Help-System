@@ -9,7 +9,10 @@ public class SceneController {
     public SceneController(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
-
+public void switchToRoleSelectionScene(String username) {
+	RoleSelectionScene roleSelectionScene = new RoleSelectionScene(this, username);
+	primaryStage.setScene(roleSelectionScene.getScene());
+}
     // Switch to "Create Admin" scene
     public void switchToCreateAdminScene() {
         CreateAdminScene createAdminScene = new CreateAdminScene(this);

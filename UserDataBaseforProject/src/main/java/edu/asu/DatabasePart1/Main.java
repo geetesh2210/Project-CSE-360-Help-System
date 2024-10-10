@@ -33,7 +33,7 @@ public class Main extends Application {
         // Show the stage with the initial scene
         primaryStage.show();
         
-        
+        dbHelper.closeConnection();
         
     }
 

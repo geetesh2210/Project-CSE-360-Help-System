@@ -67,6 +67,8 @@ public class CreateAdminScene {
 	                    if (!databaseHelper.doesUserExist(adminUsername)) {
 	                        databaseHelper.register(adminUsername, adminPassword, "admin");
 	                        databaseHelper.exportTableToFile();
+	                        System.out.println("Database operation complete.");
+	    	                databaseHelper.closeConnection();
 	                        // Switch to the Finish Setup Account scene only after successful registration
 	                        controller.switchToFinishProfileScene();
 	                    } else {
@@ -77,8 +79,7 @@ public class CreateAdminScene {
 	                ex.printStackTrace();
 	                showAlert("An error occurred during registration.");
 	            } finally {
-	                System.out.println("Database operation complete.");
-	                databaseHelper.closeConnection();
+	                
 	            }
 	            
 	        });

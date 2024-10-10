@@ -1,6 +1,8 @@
 package edu.asu.DatabasePart1;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -46,24 +48,39 @@ public class LoginScene {
                     String user = username.getText();
                     String pass = password.getText();
                     
+                   
+                    
                     if (databaseHelper.doesUserExist(user) && databaseHelper.login(user, pass)) {
                         // Switch to Home or Admin Home Scene based on user role
-                    	String role = databaseHelper.getCurrentRoles(user); // Use your method here
-
-                        // Switch to Home or Admin Home Scene based on user role
-                        if ("admin".equalsIgnoreCase(role)) {
-                            controller.switchToAdminHomeScene();
-                        } else {
-                            controller.switchToHomeScene();
-                        }
-                    }  else {
+                    	 
+						 String roles = databaseHelper.getCurrentRoles(user); 
+						 boolean OTP = databaseHelper.isPasswordReset(user);
+						 
+					
+						 databaseHelper.closeConnection();
+						 
+						 int index = roles.indexOf(" ");
+						 if(index != -1) {
+							 
+							 controller.switchToRoleSelectionScene(user);
+							 
+							 
+						 }
+						 else if(roles.equals("ADMIN")) {
+							 
+							 controller.switchToAdminHomeScene();
+						 }
+						 else { controller.switchToHomeScene();
+                    	
+                    	
+                    } } else {
                         showAlert("Invalid username or password.");
                     }
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                     showAlert("An error occurred during login.");
                 } finally {
-                    databaseHelper.closeConnection();
+                    
                 }
             }
         });

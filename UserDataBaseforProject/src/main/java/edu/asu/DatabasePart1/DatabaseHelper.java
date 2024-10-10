@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A helper class to store data
@@ -194,7 +197,11 @@ class DatabaseHelper {
 	 */
 	public void register(String username, String password, String role) throws SQLException {
 		//the command to that we would like to execute on the table
-		role = getUserCount() == 0 ? "ADMIN" : "USER"; // Check if it's the first user
+		
+		if(getUserCount() == 0)
+		{
+			role = "ADMIN";
+		}
 		String insertUser = "INSERT INTO cse360users (username, password, role) VALUES (?, ?, ?)";
 		//set the data to insert
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
@@ -249,6 +256,17 @@ class DatabaseHelper {
 			}
 		}
 	}
+	
+	public boolean loginWithcode(String username, String code) throws SQLException{
+		String query = "SELECT * FROM cse360users WHERE username = ? AND onetimeCode = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, username);
+			pstmt.setString(2, code);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				return rs.next();
+			}
+		}
+	}
 	/**
 	 * A method to check if username exists
 	 * @param username
@@ -281,6 +299,37 @@ class DatabaseHelper {
 	/****************************************************************************************/
 	/****************************************************************************************/
 	//FUNCTION FOR ADMIN TO USE
+	public boolean isPasswordReset(String username) throws SQLException
+	{
+		String checkQ = "SELECT cse360users WHERE username = ?";
+		boolean flag = false; 
+		try(PreparedStatement s = connection.prepareStatement(checkQ))
+		{
+			s.setString(1, username);
+			ResultSet rs = s.executeQuery();
+			String oneTimeCode = rs.getString("onetimeCode");
+			if(oneTimeCode.equals(null))
+			{
+				return true;
+			}
+			return flag;
+		}
+	}
+	
+	public String oneTimeCodeOf(String username) throws SQLException
+	{
+		String checkQ = "SELECT cse360users WHERE username = ?";
+		try(PreparedStatement s = connection.prepareStatement(checkQ))
+		{
+			String code = "";
+			s.setString(1, username);
+			ResultSet rs = s.executeQuery();
+			String oneTimeCode = rs.getString("onetimeCode");
+			if(!oneTimeCode.equals(null))
+				return code;
+			return "";
+		}
+	}
 	/**
 	 * A function to reset userAccount from admin perspective
 	 * @param username username to reset
@@ -300,6 +349,7 @@ class DatabaseHelper {
 	    try (PreparedStatement pstmt = connection.prepareStatement(updateQuery)) {
 	        pstmt.setString(1, code);
 	        pstmt.setString(2, formattedExpirationTime); // Use the formatted expiration time
+	        //pstmt.setString(3, code); // set the password to the code
 	        pstmt.setString(3, username);
 	        
 	        int rowsAffected = pstmt.executeUpdate();
@@ -372,7 +422,7 @@ class DatabaseHelper {
 	 */
 	public boolean deleteUserAccount(String username) throws SQLException
 	{
-		String query = "DELETE * FROM cse360users WHERE username = ?";
+		String query = "DELETE FROM cse360users WHERE username = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, username);
 			int rowsAffected = pstmt.executeUpdate();
@@ -518,6 +568,8 @@ class DatabaseHelper {
 	    }
 	    return 0; // Return 0 if there's an error or no users
 	}
+	
+	 
 }
 
 
